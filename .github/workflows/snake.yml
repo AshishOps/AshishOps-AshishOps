@@ -8,21 +8,26 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    
+    permissions:
+      contents: write
+
     steps:
-      - name: Generate snake animation
-        uses: Platane/snk@v3
+      - uses: actions/checkout@v4
+
+      - uses: Platane/snk@v3
         with:
           github_user_name: AshishOps
           outputs: |
             dist/github-snake.svg
             dist/github-snake-dark.svg?palette=github-dark
 
-      - name: Push to output branch
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: dist
-          publish_branch: output
-          force_orphan: true
+      - name: Push output
+        run: |
+          cd dist
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b output
+          git add .
+          git commit -m "Generate snake animation"
+          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/AshishOps/AshishOps.git output
